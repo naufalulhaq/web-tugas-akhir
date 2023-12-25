@@ -1,0 +1,39 @@
+<form action="{{ url_for('sql_table') }}" method="get">
+    <label for="filter_column">Filter Column:</label>
+    <select name="filter_column">
+        <option value="is_holiday">Is Holiday</option>
+        <!-- Add more options as needed -->
+    </select>
+    <label for="filter_value">Filter Value:</label>
+    <input type="text" name="filter_value">
+    <button type="submit">Apply Filter</button>
+</form>
+
+<form action="{{ url_for('sql_table') }}" method="get">
+    <label for="sort_column">Sort Column:</label>
+    <select name="sort_column">
+        <option value="date_time">Date and Time</option>
+        <!-- Add more options as needed -->
+    </select>
+    <label for="sort_order">Sort Order:</label>
+    <select name="sort_order">
+        <option value="ASC">Ascending</option>
+        <option value="DESC">Descending</option>
+    </select>
+    <button type="submit">Apply Sort</button>
+</form>
+
+<table border="1" cellpadding="5" cellspacing="5">
+    <tr>
+        {% for col in data[0].keys() %}
+            <th>{{ col }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data %}
+        <tr>
+            {% for val in row.values() %}
+                <td>{{ val }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
