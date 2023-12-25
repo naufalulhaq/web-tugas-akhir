@@ -81,7 +81,7 @@ def chart():
 
 @app.route('/form')
 def form():
-    return render_template('form-new.html', baseurl=Baseurl)
+    return render_template('form.html', baseurl=Baseurl)
 
 @app.route('/process_data', methods=['POST'])
 def process_data():
