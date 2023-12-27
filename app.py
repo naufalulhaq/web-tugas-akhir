@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, request, redirect
 import mysql.connector
 import pandas as pd
+# from mlutils import predict
 
 app = Flask(__name__, static_folder='src')
 
@@ -52,36 +53,9 @@ def Baseurl(address):
 def index():
     return render_template('basic-table.html', baseurl=Baseurl)
 
-@app.route('/chart')
-def chart():
-    sql = "SELECT * FROM sample"
-
-    mycursor = conn.cursor(dictionary=True)
-    mycursor.execute(sql)
-    myresult = mycursor.fetchall()
-
-    Results = {}
-    Results["date_time"] = [entry["date_time"] for entry in myresult]
-    Results["is_holiday"] = [entry["is_holiday"] for entry in myresult]
-    Results["air_pollution_index"] = [entry["air_pollution_index"] for entry in myresult]
-    Results["humidity"] = [entry["humidity"] for entry in myresult]
-    Results["wind_speed"] = [entry["wind_speed"] for entry in myresult]
-    Results["wind_direction"] = [entry["wind_direction"] for entry in myresult]
-    Results["visibility_in_miles"] = [entry["visibility_in_miles"] for entry in myresult]
-    Results["dew_point"] = [entry["dew_point"] for entry in myresult]
-    Results["temperature"] = [entry["temperature"] for entry in myresult]
-    Results["rain_p_h"] = [entry["rain_p_h"] for entry in myresult]
-    Results["snow_p_h"] = [entry["snow_p_h"] for entry in myresult]
-    Results["clouds_all"] = [entry["clouds_all"] for entry in myresult]
-    Results["weather_type"] = [entry["weather_type"] for entry in myresult]
-    Results["weather_description"] = [entry["weather_description"] for entry in myresult]
-    Results["traffic_volume"] = [entry["traffic_volume"] for entry in myresult]
-
-    return render_template('chartjs-cobain.html', baseurl=Baseurl, results=Results)
-
 @app.route('/form')
 def form():
-    return render_template('form.html', baseurl=Baseurl)
+    return render_template('form_clean.html', baseurl=Baseurl)
 
 @app.route('/process_data', methods=['POST'])
 def process_data():
@@ -132,14 +106,56 @@ def process_data():
 
 @app.route('/table')
 def sql_table():
+    sql = "SELECT * FROM sample_v2"
+
+    mycursor = conn.cursor(dictionary=True)
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+
+    return render_template('table_clean.html', baseurl=Baseurl, data=myresult)
+
+@app.route('/predict')
+def predict_data():
+    sql = "SELECT * FROM ( SELECT * FROM sample_v2 ORDER BY id DESC LIMIT 24 ) as SUBQUERY ORDER BY id"
+
+    mycursor = conn.cursor(dictionary=True)
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+
+    df = pd.DataFrame(myresult)
+    df.drop(columns=['id'], inplace=True)
+    
+    pred = predict(df)
+    print(pred)
+
+    return render_template('table.html', baseurl=Baseurl, data=myresult)
+
+@app.route('/chart')
+def chart():
     sql = "SELECT * FROM sample"
 
     mycursor = conn.cursor(dictionary=True)
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
 
-    return render_template('table.html', baseurl=Baseurl, data=myresult)
+    Results = {}
+    Results["date_time"] = [entry["date_time"] for entry in myresult]
+    Results["is_holiday"] = [entry["is_holiday"] for entry in myresult]
+    Results["air_pollution_index"] = [entry["air_pollution_index"] for entry in myresult]
+    Results["humidity"] = [entry["humidity"] for entry in myresult]
+    Results["wind_speed"] = [entry["wind_speed"] for entry in myresult]
+    Results["wind_direction"] = [entry["wind_direction"] for entry in myresult]
+    Results["visibility_in_miles"] = [entry["visibility_in_miles"] for entry in myresult]
+    Results["dew_point"] = [entry["dew_point"] for entry in myresult]
+    Results["temperature"] = [entry["temperature"] for entry in myresult]
+    Results["rain_p_h"] = [entry["rain_p_h"] for entry in myresult]
+    Results["snow_p_h"] = [entry["snow_p_h"] for entry in myresult]
+    Results["clouds_all"] = [entry["clouds_all"] for entry in myresult]
+    Results["weather_type"] = [entry["weather_type"] for entry in myresult]
+    Results["weather_description"] = [entry["weather_description"] for entry in myresult]
+    Results["traffic_volume"] = [entry["traffic_volume"] for entry in myresult]
 
+    return render_template('chartjs-cobain.html', baseurl=Baseurl, results=Results)
 
 if __name__ == '__main__':
     app.run(debug='True')
