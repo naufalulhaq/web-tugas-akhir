@@ -29,7 +29,6 @@ $(function() {
       fill: false
     }]
   };
-  
   var multiLineData = {
     labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
     datasets: [{
