@@ -1,0 +1,204 @@
+{% extends "layout.html" %}
+
+{% block title %}Chart{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Traffic Volume: True Value vs Prediction</h4>
+        <div class="row">
+          <div class="col-lg-8">
+            <canvas id="lineChart_traffic"></canvas>
+          </div>
+          <div class="col-lg-4">
+          <div class="mt-3 me-3">
+            <div class="wrapper d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div class="d-flex">
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">Prediction</p>
+                  <small class="text-muted mb-0">{{results['prediction'][-1]|round|int}}</small>
+                </div>
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">True Value</p>
+                  <small class="text-muted mb-0">{{results['traffic_volume'][-1]}}</small>
+                </div>
+              </div>
+              <div class="text-muted text-small">
+                1 hour ahead
+              </div>
+            </div>
+            <div class="wrapper d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div class="d-flex">
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">Prediction</p>
+                  <small class="text-muted mb-0">{{results['prediction'][-2]|round|int}}</small>
+                </div>
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">True Value</p>
+                  <small class="text-muted mb-0">{{results['traffic_volume'][-2]|round|int}}</small>
+                </div>
+              </div>
+              <div class="text-muted text-small">
+                current hour
+              </div>
+            </div>
+            <div class="wrapper d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div class="d-flex">
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">Prediction</p>
+                  <small class="text-muted mb-0">{{results['prediction'][-3]|round|int}}</small>
+                </div>
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">True Value</p>
+                  <small class="text-muted mb-0">{{results['traffic_volume'][-3]|round|int}}</small>
+                </div>
+              </div>
+              <div class="text-muted text-small">
+                1 hour ago
+              </div>
+            </div>
+            <div class="wrapper d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div class="d-flex">
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">Prediction</p>
+                  <small class="text-muted mb-0">{{results['prediction'][-4]|round|int}}</small>
+                </div>
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">True Value</p>
+                  <small class="text-muted mb-0">{{results['traffic_volume'][-4]|round|int}}</small>
+                </div>
+              </div>
+              <div class="text-muted text-small">
+                2 hours ago
+              </div>
+            </div>
+            <div class="wrapper d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div class="d-flex">
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">Prediction</p>
+                  <small class="text-muted mb-0">{{results['prediction'][-5]|round|int}}</small>
+                </div>
+                <div class="wrapper ms-3">
+                  <p class="ms-1 mb-1 fw-bold">True Value</p>
+                  <small class="text-muted mb-0">{{results['traffic_volume'][-5]|round|int}}</small>
+                </div>
+              </div>
+              <div class="text-muted text-small">
+                3 hours ago
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+</div>
+<div class="row">
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Last 24 hour dataset</h3>
+        <p class="card-description">
+        <div class="table-responsive">
+          <table class="table">
+            <tr>
+              <thead>
+                {% for col in data[0].keys() %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+              </thead>
+            </tr>
+            {% for row in data %}
+                <tr>
+                    {% for val in row.values() %}
+                        <td>{{ val }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ baseurl('assets/js/chart.js') }}"></script>
+<script src="{{ baseurl('assets/vendors/chart.js/Chart.min.js') }}"></script>
+
+<script>
+  var res = {
+      "date_time": {{ results["date_time"] | tojson | safe }},
+      "traffic_volume": {{ results["traffic_volume"] | tojson | safe }},
+      "prediction": {{ results["prediction"] | tojson | safe }}
+  };
+
+
+  var options = {
+	responsive: true,
+	interaction: {
+		intersect: false,
+	},
+	scales: {
+		yAxes: [{
+			ticks: {
+				beginAtZero: true
+			}
+		}]
+	},
+	legend: {
+		display: false
+	},
+	elements: {
+		point: {
+			radius: 2
+		}
+	}
+};
+
+  console.log("Data:", res);
+  
+  'use strict';
+  var trafficData = {
+      labels: res["date_time"],
+      datasets: [
+        {
+          label: 'Prediction',
+          data: res["prediction"],
+          backgroundColor: 'rgba(0, 0, 0, 0)', // Different color for better visibility
+          borderColor: 'rgba(31, 59, 179, 100)',
+          borderWidth: 3,
+          // cubicInterpolationMode: 'monotone',
+          tension: 0,
+          fill: false
+        },{
+          label: 'True Value',
+          data: res["traffic_volume"],
+          backgroundColor: 'rgba(0, 0, 0, 0)', // Different color for better visibility
+          borderColor: 'rgba(166, 177, 228, 100)',
+          borderWidth: 3,
+          // cubicInterpolationMode: 'monotone',
+          tension: 0.2,
+          fill: false
+        },
+      ]
+  };
+  
+  var traffic = document.getElementById('lineChart_traffic').getContext('2d');
+  var trafficChart = new Chart(traffic, {
+      type: 'line',
+      data: trafficData,
+      options: options
+  });
+
+
+  console.log("Charts initialized successfully.");
+</script>
+{% endblock %}
